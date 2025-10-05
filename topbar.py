@@ -93,22 +93,23 @@ class TopBar:
         button_x = 10
         button_y = (height - button_height) // 2
 
-        self.draw_remove_toggle = ToggleButton(
-            (button_x, button_y),
-            (button_width, button_height),
-            self.font,
-            options=["Draw", "Remove"]
-        )
-
-        # Position type dropdown right next to the draw/remove toggle with 10 px gap
         type_width = 160
         type_x = button_x + button_width + 10
 
+        # Invert positions:
         self.type_dropdown = ToggleButton(
-            (type_x, button_y),
+            (button_x, button_y),
             (type_width, button_height),
             self.font,
             options=TILE_TYPES
+        )
+
+        draw_remove_x = button_x + type_width + 10
+        self.draw_remove_toggle = ToggleButton(
+            (draw_remove_x, button_y),
+            (button_width, button_height),
+            self.font,
+            options=["Draw", "Remove"]
         )
 
         dropdown_width = 80
