@@ -37,6 +37,8 @@ class Player:
         self.image = pygame.Surface((self._tile_size, self._tile_size))
         self.image.fill(self.color)
         self.rect = self.image.get_rect()
+        self.hover_rect = pygame.Rect(0, 0, tile_size, tile_size)
+        self.hover_visible = False
 
 
     def change_action(self, key_pressed):
@@ -54,7 +56,31 @@ class Player:
                 print("SE AGREGO")
             elif self.action == "remove_tile":
                 world.remove_tile(gx, gy)
+    def update_hover(self, mouse_pos, topbar_height):
+        """Actualiza la posición del tile de previsualización (hover)."""
+        mx, my = mouse_pos
 
+        # No mostrar si el mouse está sobre el TopBar o no hay tile seleccionado
+        if my <= topbar_height or self.selected_tile_type is None:
+            self.hover_visible = False
+            return
+
+        wx, wy = mx + self.camera.x, my + self.camera.y
+        gx, gy = int(wx // self._tile_size), int(wy // self._tile_size)
+        sx, sy = gx * self._tile_size - self.camera.x, gy * self._tile_size - self.camera.y
+
+        # Actualizar la posición del rectángulo del hover
+        self.hover_rect.topleft = (sx, sy)
+        self.hover_visible = True
+
+    # ======================================================
+    #                 DIBUJAR TILE HOVER
+    # ======================================================
+    def draw_hover(self, surface):
+        if self.hover_visible and self.selected_tile_type:
+            hover_img = self.selected_tile_type.copy()
+            hover_img.set_alpha(120)  # hace semitransparente
+            surface.blit(hover_img, self.hover_rect)
 
     def update_position(self, keys):
         self.camera.move(keys)

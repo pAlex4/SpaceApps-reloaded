@@ -66,6 +66,7 @@ while running:
 
     keys = pygame.key.get_pressed()
     player.update_position(keys)
+    player.update_hover(pygame.mouse.get_pos(), topbar.height)
 
  
     world.draw_grid(screen, player.camera)
