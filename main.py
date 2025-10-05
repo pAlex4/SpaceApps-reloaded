@@ -11,7 +11,7 @@ def main():
     pygame.init()
     SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Grid Centered, Buttons Swapped")
+    pygame.display.set_caption("Tile Placement with Export")
     clock = pygame.time.Clock()
 
     topbar = TopBar(SCREEN_WIDTH)
@@ -39,14 +39,16 @@ def main():
                             grid_size=25)
     player = Player(0, 0, tile_size=world.tile_size)
 
-    # Default size 4x4
     topbar.toggle_button.current_index = topbar.toggle_button.options.index("4x4")
+
+    placed_tiles_values = []
 
     def get_ui_rects():
         rects = [
             topbar.draw_remove_toggle.rect,
             topbar.type_dropdown.rect,
             topbar.toggle_button.rect,
+            topbar.export_button.rect
         ]
 
         if topbar.type_dropdown.is_open:
@@ -82,21 +84,27 @@ def main():
     running = True
     while running:
         mouse_grid_pos = None
+        export_clicked = False
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                pygame.quit()
+                sys.exit()
 
             topbar.handle_event(event)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
 
+                # Check for export button click
+                if topbar.export_button.rect.collidepoint(mouse_pos):
+                    export_clicked = True
+                    continue  # skip placement/removal on export click
+
                 if is_menu_open() or click_on_ui(mouse_pos):
                     pass
                 else:
                     if mouse_pos[1] > topbar_height:
-                        # Calculate horizontal centering offset same as world.py
                         tile_size = world.tile_size
                         grid_pixel_width = tile_size * world.grid_size
                         x_offset = (SCREEN_WIDTH - grid_pixel_width) // 2
@@ -131,6 +139,19 @@ def main():
                                 if block:
                                     world.remove_tile_at(grid_x, grid_y)
                                     money += cost_map.get((block.width, block.height), 5)
+
+        if export_clicked:
+            placed_tiles_values.clear()
+            for block in world.tile_blocks:
+                tile_info = {
+                    'gx': block.gx,
+                    'gy': block.gy,
+                    'width': block.width,
+                    'height': block.height,
+                    'type': block.type
+                }
+                placed_tiles_values.append(tile_info)
+            print("Exported tiles:", placed_tiles_values)
 
         selected_shape = topbar.toggle_button.get_current_option()
         current_shape = size_map.get(selected_shape, (1, 1))
@@ -170,9 +191,6 @@ def main():
 
         pygame.display.flip()
         clock.tick(60)
-
-    pygame.quit()
-    sys.exit()
 
 if __name__ == "__main__":
     main()

@@ -68,7 +68,6 @@ class ToggleButton:
                                 [(self.rect.right - 15, self.rect.y + self.rect.height // 3),
                                  (self.rect.right - 5, self.rect.y + self.rect.height // 3),
                                  (self.rect.right - 10, self.rect.y + self.rect.height * 2 // 3)])
-
             if self.is_open:
                 for i, option in enumerate(self.options):
                     option_rect = pygame.Rect(
@@ -81,6 +80,7 @@ class ToggleButton:
                     surface.blit(option_text, (option_rect.x + 5, option_rect.y + (option_rect.height - option_text.get_height()) // 2))
                     if option_rect.collidepoint(pygame.mouse.get_pos()):
                         pygame.draw.rect(surface, self.highlight_color, option_rect, 2)
+
 
 class TopBar:
     def __init__(self, screen_width, height=40):
@@ -96,14 +96,13 @@ class TopBar:
         type_width = 160
         type_x = button_x + button_width + 10
 
-        # Invert positions:
+        # Invert "Draw/Remove" and "Type" positions
         self.type_dropdown = ToggleButton(
             (button_x, button_y),
             (type_width, button_height),
             self.font,
             options=TILE_TYPES
         )
-
         draw_remove_x = button_x + type_width + 10
         self.draw_remove_toggle = ToggleButton(
             (draw_remove_x, button_y),
@@ -124,16 +123,31 @@ class TopBar:
             options=["1x1", "2x2", "3x1", "4x4"]
         )
 
+        export_width = 80
+        export_height = 30
+        export_x = dropdown_x - export_width - 10
+        export_y = button_y
+
+        self.export_button = ToggleButton(
+            (export_x, export_y),
+            (export_width, export_height),
+            self.font,
+            options=["Export"]
+        )
+        self.export_button.is_open = False  # behaves as a simple button
+
     def handle_event(self, event):
         self.draw_remove_toggle.handle_event(event)
         self.toggle_button.handle_event(event)
         self.type_dropdown.handle_event(event)
+        # Export button does not toggle open; detect clicks in main loop
 
     def draw(self, surface, money=0):
         pygame.draw.rect(surface, self.bg_color, (0, 0, surface.get_width(), self.height))
         self.draw_remove_toggle.draw(surface)
         self.type_dropdown.draw(surface)
         self.toggle_button.draw(surface)
+        self.export_button.draw(surface)
 
         money_text = self.font.render(f"Money: ${money}", True, (255, 255, 255))
         text_rect = money_text.get_rect()
