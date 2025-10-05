@@ -65,18 +65,20 @@ while running:
                     selected_shape = topbar.toggle_button.get_current_option()
                     current_shape = size_map.get(selected_shape, (1, 1))
                     width, height = current_shape
+
                     cost = cost_map.get(current_shape, 5)
+                    selected_type = topbar.type_dropdown.get_current_option()
 
                     if player.action == "draw_tile":
                         if money >= cost:
-                            world.add_tile_block(grid_x, grid_y, width, height)
+                            world.add_tile_block(grid_x, grid_y, width, height, selected_type)
                             money -= cost
                         else:
                             print("Not enough money!")
                     elif player.action == "remove_tile":
                         block = world.get_block_at(grid_x, grid_y)
                         if block:
-                            world.remove_tile_block(block)
+                            world.remove_tile_at(grid_x, grid_y)
                             money += cost_map.get((block.width, block.height), 5)
 
     selected_shape = topbar.toggle_button.get_current_option()

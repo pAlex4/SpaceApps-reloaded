@@ -17,9 +17,9 @@ class WorldGeneration:
 
         self.tile_blocks = []
 
-    def add_tile_block(self, gx, gy, width, height):
-        # Optional: add overlap checking if needed
-        block = TileBlock(gx, gy, width, height, self._tile_size)
+    def add_tile_block(self, gx, gy, width, height, type_override=None):
+        # Optional: check overlap here if needed
+        block = TileBlock(gx, gy, width, height, self._tile_size, type_override)
         self.tile_blocks.append(block)
 
     def remove_tile_at(self, gx, gy):
@@ -59,13 +59,3 @@ class WorldGeneration:
     @property
     def screen_size(self):
         return (self._screen_width, self._screen_height)
-
-    def remove_tile_block(self, block):
-        if block in self.tile_blocks:
-            self.tile_blocks.remove(block)
-
-    def get_block_at(self, gx, gy):
-        for block in self.tile_blocks:
-            if block.covers(gx, gy):
-                return block
-        return None

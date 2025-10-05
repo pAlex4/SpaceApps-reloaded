@@ -5,6 +5,12 @@ BLACK = (0, 0, 0)
 GRAY = (180, 180, 180)
 BLUE = (50, 100, 200)
 
+TILE_TYPES = [
+    "private", "hygiene", "waste", "exercise", "food",
+    "maintenance", "science", "medical", "social",
+    "logistics", "airlock"
+]
+
 class ToggleButton:
     def __init__(self, position, size, font, options=None):
         self.rect = pygame.Rect(position, size)
@@ -94,6 +100,17 @@ class TopBar:
             options=["Draw", "Remove"]
         )
 
+        # Position type dropdown right next to the draw/remove toggle with 10 px gap
+        type_width = 160
+        type_x = button_x + button_width + 10
+
+        self.type_dropdown = ToggleButton(
+            (type_x, button_y),
+            (type_width, button_height),
+            self.font,
+            options=TILE_TYPES
+        )
+
         dropdown_width = 80
         dropdown_height = 30
         dropdown_x = screen_width - dropdown_width - 10
@@ -109,18 +126,17 @@ class TopBar:
     def handle_event(self, event):
         self.draw_remove_toggle.handle_event(event)
         self.toggle_button.handle_event(event)
+        self.type_dropdown.handle_event(event)
 
     def draw(self, surface, money=0):
         pygame.draw.rect(surface, self.bg_color, (0, 0, surface.get_width(), self.height))
         self.draw_remove_toggle.draw(surface)
+        self.type_dropdown.draw(surface)
         self.toggle_button.draw(surface)
 
         money_text = self.font.render(f"Money: ${money}", True, (255, 255, 255))
         text_rect = money_text.get_rect()
-        
-        # Center text horizontally and vertically in the topbar
         center_x = surface.get_width() // 2
         center_y = self.height // 2
         text_rect.center = (center_x, center_y)
-        
         surface.blit(money_text, text_rect)
