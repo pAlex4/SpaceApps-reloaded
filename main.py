@@ -18,20 +18,18 @@ clock = pygame.time.Clock()
 topbar = TopBar(SCREEN_WIDTH)
 topbar_height = topbar.height
 
+size_map = {
+    "1x1": (1, 1),
+    "2x2": (2, 2),
+    "3x1": (3, 1),
+    "4x4": (4, 4)
+}
+
 world = WorldGeneration(screen_width=SCREEN_WIDTH,
                         screen_height=SCREEN_HEIGHT,
                         topbar_height=topbar_height,
                         grid_size=25)
 player = Player(0, 0, tile_size=world.tile_size)
-
-# Define tile shapes: width x height in tiles
-tile_shapes = {
-    '1': (1, 1),  # single tile - default
-    '2': (2, 2),  # 2x2 block
-    '3': (3, 1),  # 3x1 horizontal strip
-    '4': (4, 4)   # 4x4 block
-}
-current_shape = tile_shapes['1']
 
 running = True
 while running:
@@ -52,30 +50,26 @@ while running:
                 grid_y = int(wy // world.tile_size)
 
                 if 0 <= grid_x < world.grid_size and 0 <= grid_y < world.grid_size:
-                    current_action = topbar.toggle_button.get_current_option()
-                    player.action = "add_tile" if current_action == "draw" else "remove_tile"
+                    current_action = topbar.draw_remove_toggle.get_current_option().lower() + "_tile"  # 'draw_tile' or 'remove_tile'
+                    player.action = current_action
+
+                    selected_shape = topbar.toggle_button.get_current_option()
+                    current_shape = size_map.get(selected_shape, (1, 1))
 
                     width, height = current_shape
                     for dx in range(width):
                         for dy in range(height):
                             tx, ty = grid_x + dx, grid_y + dy
                             if 0 <= tx < world.grid_size and 0 <= ty < world.grid_size:
-                                if player.action == "add_tile":
+                                if player.action == "draw_tile":
                                     world.add_tile(tx, ty)
-                                else:
+                                elif player.action == "remove_tile":
                                     world.remove_tile(tx, ty)
 
-    # Handle tile shape selection keys
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_1]:
-        current_shape = tile_shapes['1']
-    elif keys[pygame.K_2]:
-        current_shape = tile_shapes['2']
-    elif keys[pygame.K_3]:
-        current_shape = tile_shapes['3']
-    elif keys[pygame.K_4]:
-        current_shape = tile_shapes['4']
+    selected_shape = topbar.toggle_button.get_current_option()
+    current_shape = size_map.get(selected_shape, (1, 1))
 
+    keys = pygame.key.get_pressed()
     player.update_position(keys)
 
     mx, my = pygame.mouse.get_pos()
@@ -92,17 +86,16 @@ while running:
     world.draw_tiles(screen, player.camera, topbar_height)
     player.draw(screen)
 
-    # Draw hover preview for entire current shape area
     if mouse_grid_pos:
         width, height = current_shape
         for dx in range(width):
             for dy in range(height):
                 px = (mouse_grid_pos[0] + dx) * world.tile_size
                 py = (mouse_grid_pos[1] + dy) * world.tile_size
-                sx, sy = player.camera.transform_coordinate((px, py + topbar_height))  # Add topbar for alignment
+                sx, sy = player.camera.transform_coordinate((px, py + topbar_height))
                 hover_rect = pygame.Rect(sx, sy, world.tile_size, world.tile_size)
                 hover_surface = pygame.Surface((world.tile_size, world.tile_size), pygame.SRCALPHA)
-                hover_surface.fill((255, 255, 0, 100))  # Semi-transparent yellow
+                hover_surface.fill((255, 255, 0, 100))
                 screen.blit(hover_surface, hover_rect.topleft)
 
     topbar.draw(screen)
