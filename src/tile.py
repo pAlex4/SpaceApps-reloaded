@@ -24,12 +24,12 @@ class AssetTile(Tile):
                  resistencia=0.0, radiacion=0.0, 
                  tiempo_almacenamiento=0.0, muestras=1):
         super().__init__(grid_x, grid_y, size, color)
-        self.material = material
-        self.estructura = estructura
+        self.material = material # asdasd
+        self.estructura = estructura # asdasd
         self.masa = masa
         self.volumen = volumen
         self.costo = costo
-        self.resistencia = resistencia
+        self.resistencia = resistencia # asdasdasda
         self.radiacion = radiacion
         self.tiempo_almacenamiento = tiempo_almacenamiento
         self.muestras = muestras
