@@ -46,11 +46,12 @@ class TileBlock(pygame.sprite.Sprite):
         self.limpieza = random.uniform(0, 1)
         self.permanencia = random.randint(1, 365)
 
-        print(f"Placed TileBlock at grid position ({self.gx}, {self.gy}), "
-              f"size ({self.width}x{self.height}): type={self.type}, "
-              f"masa={self.masa:.2f}, volumen={self.volumen:.2f}, costo=${self.costo:.2f}, "
-              f"limpieza={self.limpieza:.2f}, permanencia={self.permanencia} days, "
-              f"color={self.color}")
+        print(
+            f"gx = {self.gx}, gy = {self.gy}, width = {self.width}, height = {self.height}, "
+            f"type = {self.type}, masa = {self.masa:.2f}, volumen = {self.volumen:.2f}, "
+            f"costo = {self.costo:.2f}, limpieza = {self.limpieza:.2f}, permanencia = {self.permanencia} days, "
+            f"color = {self.color}"
+        )
 
     def covers(self, gx, gy):
         return (self.gx <= gx < self.gx + self.width) and (self.gy <= gy < self.gy + self.height)
