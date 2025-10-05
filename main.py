@@ -1,5 +1,6 @@
 import pygame
 import sys
+import json
 
 from player import Player
 from world import WorldGeneration
@@ -11,7 +12,7 @@ def main():
     pygame.init()
     SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Tile Placement with Export")
+    pygame.display.set_caption("Tile Placement with Property Export")
     clock = pygame.time.Clock()
 
     topbar = TopBar(SCREEN_WIDTH)
@@ -96,10 +97,10 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
 
-                # Check for export button click
+                # Detect export button click
                 if topbar.export_button.rect.collidepoint(mouse_pos):
                     export_clicked = True
-                    continue  # skip placement/removal on export click
+                    continue
 
                 if is_menu_open() or click_on_ui(mouse_pos):
                     pass
@@ -143,15 +144,26 @@ def main():
         if export_clicked:
             placed_tiles_values.clear()
             for block in world.tile_blocks:
-                tile_info = {
-                    'gx': block.gx,
-                    'gy': block.gy,
-                    'width': block.width,
-                    'height': block.height,
-                    'type': block.type
+                cell = {
+                    "x": block.gx,
+                    "y": block.gy,
+                    "type": block.type.upper(),
+                    "props": {
+                        "masa": getattr(block, "masa", 0.0),
+                        "volumen": getattr(block, "volumen", 0.0),
+                        "costo": getattr(block, "costo", 0.0),
+                        "limpieza": getattr(block, "limpieza", 1.0),
+                        "permanencia": getattr(block, "permanencia", 1)
+                    }
                 }
-                placed_tiles_values.append(tile_info)
-            print("Exported tiles:", placed_tiles_values)
+                placed_tiles_values.append(cell)
+
+            data = {"cells": placed_tiles_values}
+
+            with open("exported_tiles.json", "w") as f:
+                json.dump(data, f, indent=2)
+
+            print("Exported tiles saved to exported_tiles.json")
 
         selected_shape = topbar.toggle_button.get_current_option()
         current_shape = size_map.get(selected_shape, (1, 1))
