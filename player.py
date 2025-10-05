@@ -79,9 +79,11 @@ class Player:
     def draw_hover(self, surface):
         if self.hover_visible and self.selected_tile_type:
             hover_img = self.selected_tile_type.copy()
-            hover_img.set_alpha(120)  # hace semitransparente
+            hover_img.set_alpha(120)
             surface.blit(hover_img, self.hover_rect)
-
+        else:
+            # Dibujar un borde rojo para confirmar el área del hover
+            pygame.draw.rect(surface, (255, 0, 0), self.hover_rect, 1)
     def update_position(self, keys):
         self.camera.move(keys)
 

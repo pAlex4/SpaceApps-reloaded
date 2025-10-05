@@ -63,21 +63,19 @@ while running:
 
 
     draw_tiled_background(screen, background_tile, player.camera)
-
     keys = pygame.key.get_pressed()
     player.update_position(keys)
     player.update_hover(pygame.mouse.get_pos(), topbar.height)
 
- 
     world.draw_grid(screen, player.camera)
     world.draw_tiles(screen, player.camera)
-    player.draw(screen)
+    player.draw_hover(screen)  # ← hover semitransparente
+    player.draw(screen)        # ← (si dibujas al jugador visible)
 
     topbar.draw(screen)
 
     pygame.display.flip()
     clock.tick(FPS)
-
 pygame.quit()
 sys.exit()
 
