@@ -1,11 +1,7 @@
 import pygame
-from tile import *
+from tile import * # ajusta el import según tu estructura
 
-WHITE = (255, 255, 255)
 GRAY = (180, 180, 180)
-DARK_GRAY = (40, 40, 40)
-GREEN = (50, 200, 100)
-BROWN = (180, 120, 60)
 
 
 class WorldGeneration:
@@ -13,17 +9,24 @@ class WorldGeneration:
         self._screen_width = screen_width
         self._screen_height = screen_height
         self._tile_size = tile_size
-        self.tiles = {}
 
-    def add_tile(self, gx, gy, color=BROWN):
-        if (gx, gy) not in self.tiles:
-            self.tiles[(gx, gy)] = Tile(gx, gy, self._tile_size, color)
+        # Grupo de sprites para dibujar los tiles
+        self.sprites = pygame.sprite.LayeredUpdates()
+
+    def add_tile(self, gx, gy, tile_img, resistencia=0.8):
+        """Agrega un nuevo AssetTile al grupo de sprites usando una imagen ya cargada."""
+        tile = AssetTile(gx, gy, self._tile_size, img=tile_img, resistencia=resistencia)
+        self.sprites.add(tile, layer=1)
 
     def remove_tile(self, gx, gy):
-        if (gx, gy) in self.tiles:
-            del self.tiles[(gx, gy)]
+        """Elimina un tile del grupo si coincide su posición en la grilla."""
+        for sprite in list(self.sprites):
+            if isinstance(sprite, AssetTile) and sprite.grid_x == gx and sprite.grid_y == gy:
+                self.sprites.remove(sprite)
+                break
 
     def draw_grid(self, surface, camera):
+        """Dibuja líneas de cuadrícula según la cámara."""
         start_x = int(camera.x // self._tile_size) - 1
         end_x = int((camera.x + self._screen_width) // self._tile_size) + 2
         start_y = int(camera.y // self._tile_size) - 1
@@ -38,9 +41,10 @@ class WorldGeneration:
                 pygame.draw.rect(surface, GRAY, rect, 1)
 
     def draw_tiles(self, surface, camera):
-        for tile in self.tiles.values():
+        """Actualiza la posición de todos los tiles y los dibuja."""
+        for tile in self.sprites:
             tile.update_position(camera, self._tile_size)
-            surface.blit(tile.image, tile.rect)
+        self.sprites.draw(surface)
 
     @property
     def tile_size(self):

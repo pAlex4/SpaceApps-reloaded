@@ -27,6 +27,7 @@ class Player:
         self.color = color
         self.camera = Camera()
         self._tile_size = tile_size
+        self.selected_tile_type = None  # ← tipo actual de tile seleccionado
         self._actions = {
             113: "add_tile",     # key Q
             101: "remove_tile"   # key E
@@ -36,6 +37,7 @@ class Player:
         self.image = pygame.Surface((self._tile_size, self._tile_size))
         self.image.fill(self.color)
         self.rect = self.image.get_rect()
+
 
     def change_action(self, key_pressed):
         if key_pressed in self._actions:
@@ -48,9 +50,11 @@ class Player:
 
         if mouse_button == 1:
             if self.action == "add_tile":
-                world.add_tile(gx, gy)
+                world.add_tile(gx, gy, self.selected_tile_type )
+                print("SE AGREGO")
             elif self.action == "remove_tile":
                 world.remove_tile(gx, gy)
+
 
     def update_position(self, keys):
         self.camera.move(keys)

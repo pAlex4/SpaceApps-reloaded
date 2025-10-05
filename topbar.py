@@ -11,7 +11,7 @@ class TopBar:
         pygame.font.init()
         self.font = pygame.font.SysFont('Arial', 20)
 
-        options = [f"Option {i}" for i in range(20)]
+        options = ["HalfCircleTile","SquareTile", "TriangleTile"]
         self.dropdown = DropdownMenu(10, 5, 150, 30, options, self.font)
 
         button_options = ["draw", "remove"]
