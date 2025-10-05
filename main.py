@@ -71,7 +71,7 @@ while running:
 
                     if player.action == "draw_tile":
                         if money >= cost:
-                            world.add_tile_block(grid_x, grid_y, width, height, selected_type)
+                            world.add_tile_block(grid_x, grid_y, width, height, selected_type, cost)
                             money -= cost
                         else:
                             print("Not enough money!")
@@ -101,7 +101,7 @@ while running:
     world.draw_tiles(screen, player.camera, topbar_height)
     player.draw(screen)
 
-    # Draw hover preview covering the entire block area
+    # Draw hover preview covering block area
     if mouse_grid_pos:
         width, height = current_shape
         px = mouse_grid_pos[0] * world.tile_size

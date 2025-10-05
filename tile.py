@@ -7,7 +7,6 @@ TILE_TYPES = [
     "logistics", "airlock"
 ]
 
-# Define fixed colors per type
 TYPE_COLORS = {
     "private": (255, 0, 0),       # red
     "hygiene": (0, 255, 255),     # cyan
@@ -23,7 +22,7 @@ TYPE_COLORS = {
 }
 
 class TileBlock(pygame.sprite.Sprite):
-    def __init__(self, gx, gy, width, height, tile_size, type_override=None):
+    def __init__(self, gx, gy, width, height, tile_size, type_override=None, cost=0):
         super().__init__()
         self.gx = gx
         self.gy = gy
@@ -40,15 +39,16 @@ class TileBlock(pygame.sprite.Sprite):
         self.image.fill(self.color)
         self.rect = self.image.get_rect(topleft=(gx * tile_size, gy * tile_size))
 
+        self.costo = cost  # Explicit assigned cost value
+
         self.masa = random.uniform(1, 100)
         self.volumen = random.uniform(1, 50)
-        self.costo = random.uniform(100, 1000)
         self.limpieza = random.uniform(0, 1)
         self.permanencia = random.randint(1, 365)
 
         print(f"Placed TileBlock at grid position ({self.gx}, {self.gy}), "
               f"size ({self.width}x{self.height}): type={self.type}, "
-              f"masa={self.masa:.2f}, volumen={self.volumen:.2f}, costo={self.costo:.2f}, "
+              f"masa={self.masa:.2f}, volumen={self.volumen:.2f}, costo=${self.costo:.2f}, "
               f"limpieza={self.limpieza:.2f}, permanencia={self.permanencia} days, "
               f"color={self.color}")
 

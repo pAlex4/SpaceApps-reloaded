@@ -17,9 +17,8 @@ class WorldGeneration:
 
         self.tile_blocks = []
 
-    def add_tile_block(self, gx, gy, width, height, type_override=None):
-        # Optional: check overlap here if needed
-        block = TileBlock(gx, gy, width, height, self._tile_size, type_override)
+    def add_tile_block(self, gx, gy, width, height, type_override=None, cost=0):
+        block = TileBlock(gx, gy, width, height, self._tile_size, type_override, cost)
         self.tile_blocks.append(block)
 
     def remove_tile_at(self, gx, gy):
