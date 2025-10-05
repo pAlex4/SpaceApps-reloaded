@@ -25,6 +25,15 @@ size_map = {
     "4x4": (4, 4)
 }
 
+cost_map = {
+    (1, 1): 5,
+    (2, 2): 10,
+    (3, 1): 7,
+    (4, 4): 20
+}
+
+money = 150  # initial money
+
 world = WorldGeneration(screen_width=SCREEN_WIDTH,
                         screen_height=SCREEN_HEIGHT,
                         topbar_height=topbar_height,
@@ -50,21 +59,25 @@ while running:
                 grid_y = int(wy // world.tile_size)
 
                 if 0 <= grid_x < world.grid_size and 0 <= grid_y < world.grid_size:
-                    current_action = topbar.draw_remove_toggle.get_current_option().lower() + "_tile"  # 'draw_tile' or 'remove_tile'
+                    current_action = topbar.draw_remove_toggle.get_current_option().lower() + "_tile"
                     player.action = current_action
 
                     selected_shape = topbar.toggle_button.get_current_option()
                     current_shape = size_map.get(selected_shape, (1, 1))
-
                     width, height = current_shape
-                    for dx in range(width):
-                        for dy in range(height):
-                            tx, ty = grid_x + dx, grid_y + dy
-                            if 0 <= tx < world.grid_size and 0 <= ty < world.grid_size:
-                                if player.action == "draw_tile":
-                                    world.add_tile(tx, ty)
-                                elif player.action == "remove_tile":
-                                    world.remove_tile(tx, ty)
+                    cost = cost_map.get(current_shape, 5)
+
+                    if player.action == "draw_tile":
+                        if money >= cost:
+                            world.add_tile_block(grid_x, grid_y, width, height)
+                            money -= cost
+                        else:
+                            print("Not enough money!")
+                    elif player.action == "remove_tile":
+                        block = world.get_block_at(grid_x, grid_y)
+                        if block:
+                            world.remove_tile_block(block)
+                            money += cost_map.get((block.width, block.height), 5)
 
     selected_shape = topbar.toggle_button.get_current_option()
     current_shape = size_map.get(selected_shape, (1, 1))
@@ -86,19 +99,18 @@ while running:
     world.draw_tiles(screen, player.camera, topbar_height)
     player.draw(screen)
 
+    # Draw hover preview covering the entire block area
     if mouse_grid_pos:
         width, height = current_shape
-        for dx in range(width):
-            for dy in range(height):
-                px = (mouse_grid_pos[0] + dx) * world.tile_size
-                py = (mouse_grid_pos[1] + dy) * world.tile_size
-                sx, sy = player.camera.transform_coordinate((px, py + topbar_height))
-                hover_rect = pygame.Rect(sx, sy, world.tile_size, world.tile_size)
-                hover_surface = pygame.Surface((world.tile_size, world.tile_size), pygame.SRCALPHA)
-                hover_surface.fill((255, 255, 0, 100))
-                screen.blit(hover_surface, hover_rect.topleft)
+        px = mouse_grid_pos[0] * world.tile_size
+        py = mouse_grid_pos[1] * world.tile_size
+        sx, sy = player.camera.transform_coordinate((px, py + topbar_height))
+        hover_rect = pygame.Rect(sx, sy, width * world.tile_size, height * world.tile_size)
+        hover_surface = pygame.Surface(hover_rect.size, pygame.SRCALPHA)
+        hover_surface.fill((255, 255, 0, 100))  # semi-transparent yellow
+        screen.blit(hover_surface, hover_rect.topleft)
 
-    topbar.draw(screen)
+    topbar.draw(screen, money)
 
     pygame.display.flip()
     clock.tick(FPS)

@@ -27,7 +27,6 @@ class ToggleButton:
         return None
 
     def toggle(self):
-        # For simple toggle buttons with just two states
         if len(self.options) == 2:
             self.current_index = 1 - self.current_index
 
@@ -35,13 +34,10 @@ class ToggleButton:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
                 if len(self.options) == 2:
-                    # Simple toggle behavior for draw/remove button
                     self.toggle()
                 else:
-                    # Dropdown toggle behavior
                     self.is_open = not self.is_open
             elif self.is_open:
-                # Dropdown option selection
                 for i, option in enumerate(self.options):
                     option_rect = pygame.Rect(
                         self.rect.x,
@@ -61,7 +57,6 @@ class ToggleButton:
         text_surface = self.font.render(text, True, self.text_color)
         surface.blit(text_surface, (self.rect.x + 5, self.rect.y + (self.rect.height - text_surface.get_height()) // 2))
 
-        # If dropdown, draw arrow and options
         if len(self.options) > 2:
             pygame.draw.polygon(surface, self.text_color,
                                 [(self.rect.right - 15, self.rect.y + self.rect.height // 3),
@@ -87,7 +82,6 @@ class TopBar:
         self.bg_color = (50, 50, 50)
         self.font = pygame.font.SysFont(None, 24)
 
-        # Draw/Remove toggle button top-left
         button_width = 100
         button_height = 30
         button_x = 10
@@ -100,7 +94,6 @@ class TopBar:
             options=["Draw", "Remove"]
         )
 
-        # Tile size dropdown top-right
         dropdown_width = 80
         dropdown_height = 30
         dropdown_x = screen_width - dropdown_width - 10
@@ -117,9 +110,17 @@ class TopBar:
         self.draw_remove_toggle.handle_event(event)
         self.toggle_button.handle_event(event)
 
-    def draw(self, surface):
-        # Draw topbar background
+    def draw(self, surface, money=0):
         pygame.draw.rect(surface, self.bg_color, (0, 0, surface.get_width(), self.height))
-        # Draw both buttons
         self.draw_remove_toggle.draw(surface)
         self.toggle_button.draw(surface)
+
+        money_text = self.font.render(f"Money: ${money}", True, (255, 255, 255))
+        text_rect = money_text.get_rect()
+        
+        # Center text horizontally and vertically in the topbar
+        center_x = surface.get_width() // 2
+        center_y = self.height // 2
+        text_rect.center = (center_x, center_y)
+        
+        surface.blit(money_text, text_rect)

@@ -1,8 +1,7 @@
 import pygame
-from tile import *
+from tile import TileBlock
 
 GRAY = (180, 180, 180)
-BROWN = (180, 120, 60)
 
 class WorldGeneration:
     def __init__(self, screen_width=800, screen_height=600, topbar_height=40, grid_size=25):
@@ -16,19 +15,27 @@ class WorldGeneration:
         tile_size_horz = self._screen_width / self.grid_size
         self._tile_size = int(min(tile_size_vert, tile_size_horz))
 
-        self.tiles = {}
+        self.tile_blocks = []
 
-    def add_tile(self, gx, gy, color=BROWN):
-        if (gx, gy) not in self.tiles:
-            self.tiles[(gx, gy)] = Tile(gx, gy, self._tile_size, color)
+    def add_tile_block(self, gx, gy, width, height):
+        # Optional: add overlap checking if needed
+        block = TileBlock(gx, gy, width, height, self._tile_size)
+        self.tile_blocks.append(block)
 
-    def remove_tile(self, gx, gy):
-        if (gx, gy) in self.tiles:
-            del self.tiles[(gx, gy)]
+    def remove_tile_at(self, gx, gy):
+        for block in self.tile_blocks:
+            if block.covers(gx, gy):
+                self.tile_blocks.remove(block)
+                break
+
+    def get_block_at(self, gx, gy):
+        for block in self.tile_blocks:
+            if block.covers(gx, gy):
+                return block
+        return None
 
     def draw_grid(self, surface, camera, topbar_height):
         tile_size = self._tile_size
-
         for gx in range(self.grid_size):
             for gy in range(self.grid_size):
                 wx = gx * tile_size
@@ -38,10 +45,12 @@ class WorldGeneration:
                 pygame.draw.rect(surface, GRAY, rect, 1)
 
     def draw_tiles(self, surface, camera, topbar_height):
-        for tile in self.tiles.values():
-            tile.update_position(camera, self._tile_size)
-            tile.rect.y += topbar_height
-            surface.blit(tile.image, tile.rect)
+        for block in self.tile_blocks:
+            wx = block.gx * self._tile_size
+            wy = block.gy * self._tile_size + topbar_height
+            sx, sy = camera.transform_coordinate((wx, wy))
+            block.rect.topleft = (sx, sy)
+            surface.blit(block.image, block.rect)
 
     @property
     def tile_size(self):
@@ -50,3 +59,13 @@ class WorldGeneration:
     @property
     def screen_size(self):
         return (self._screen_width, self._screen_height)
+
+    def remove_tile_block(self, block):
+        if block in self.tile_blocks:
+            self.tile_blocks.remove(block)
+
+    def get_block_at(self, gx, gy):
+        for block in self.tile_blocks:
+            if block.covers(gx, gy):
+                return block
+        return None
