@@ -40,6 +40,45 @@ world = WorldGeneration(screen_width=SCREEN_WIDTH,
                         grid_size=25)
 player = Player(0, 0, tile_size=world.tile_size)
 
+# Set default tile size dropdown to "4x4"
+topbar.toggle_button.current_index = topbar.toggle_button.options.index("4x4")
+
+def get_ui_rects():
+    rects = [
+        topbar.draw_remove_toggle.rect,
+        topbar.type_dropdown.rect,
+        topbar.toggle_button.rect,
+    ]
+
+    # Add dropdown open options rectangles if open
+    if topbar.type_dropdown.is_open:
+        for i in range(len(topbar.type_dropdown.options)):
+            rect = pygame.Rect(
+                topbar.type_dropdown.rect.x,
+                topbar.type_dropdown.rect.y + topbar.type_dropdown.rect.height * (i + 1),
+                topbar.type_dropdown.rect.width,
+                topbar.type_dropdown.rect.height
+            )
+            rects.append(rect)
+
+    if topbar.toggle_button.is_open:
+        for i in range(len(topbar.toggle_button.options)):
+            rect = pygame.Rect(
+                topbar.toggle_button.rect.x,
+                topbar.toggle_button.rect.y + topbar.toggle_button.rect.height * (i + 1),
+                topbar.toggle_button.rect.width,
+                topbar.toggle_button.rect.height
+            )
+            rects.append(rect)
+    return rects
+
+def click_on_ui(mouse_pos):
+    for rect in get_ui_rects():
+        if rect.collidepoint(mouse_pos):
+            return True
+    return False
+
+
 running = True
 while running:
     mouse_grid_pos = None
@@ -52,34 +91,42 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
-            if mouse_pos[1] > topbar_height:
-                wx = mouse_pos[0] + player.camera.x
-                wy = mouse_pos[1] - topbar_height + player.camera.y
-                grid_x = int(wx // world.tile_size)
-                grid_y = int(wy // world.tile_size)
 
-                if 0 <= grid_x < world.grid_size and 0 <= grid_y < world.grid_size:
-                    current_action = topbar.draw_remove_toggle.get_current_option().lower() + "_tile"
-                    player.action = current_action
+            if click_on_ui(mouse_pos):
+                # Click was on UI or open dropdown options - skip tile placement
+                pass
+            else:
+                if mouse_pos[1] > topbar_height:
+                    wx = mouse_pos[0] + player.camera.x
+                    wy = mouse_pos[1] - topbar_height + player.camera.y
+                    grid_x = int(wx // world.tile_size)
+                    grid_y = int(wy // world.tile_size)
 
-                    selected_shape = topbar.toggle_button.get_current_option()
-                    current_shape = size_map.get(selected_shape, (1, 1))
-                    width, height = current_shape
+                    if 0 <= grid_x < world.grid_size and 0 <= grid_y < world.grid_size:
+                        current_action = topbar.draw_remove_toggle.get_current_option().lower() + "_tile"
+                        player.action = current_action
 
-                    cost = cost_map.get(current_shape, 5)
-                    selected_type = topbar.type_dropdown.get_current_option()
+                        selected_shape = topbar.toggle_button.get_current_option()
+                        current_shape = size_map.get(selected_shape, (1, 1))
+                        width, height = current_shape
 
-                    if player.action == "draw_tile":
-                        if money >= cost:
-                            world.add_tile_block(grid_x, grid_y, width, height, selected_type, cost)
-                            money -= cost
-                        else:
-                            print("Not enough money!")
-                    elif player.action == "remove_tile":
-                        block = world.get_block_at(grid_x, grid_y)
-                        if block:
-                            world.remove_tile_at(grid_x, grid_y)
-                            money += cost_map.get((block.width, block.height), 5)
+                        cost = cost_map.get(current_shape, 5)
+                        selected_type = topbar.type_dropdown.get_current_option()
+
+                        if player.action == "draw_tile":
+                            if money >= cost:
+                                placed = world.add_tile_block(grid_x, grid_y, width, height, selected_type, cost)
+                                if placed:
+                                    money -= cost
+                                else:
+                                    print("Tile placement failed: overlapping tiles")
+                            else:
+                                print("Not enough money!")
+                        elif player.action == "remove_tile":
+                            block = world.get_block_at(grid_x, grid_y)
+                            if block:
+                                world.remove_tile_at(grid_x, grid_y)
+                                money += cost_map.get((block.width, block.height), 5)
 
     selected_shape = topbar.toggle_button.get_current_option()
     current_shape = size_map.get(selected_shape, (1, 1))

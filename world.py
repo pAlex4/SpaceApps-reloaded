@@ -17,9 +17,23 @@ class WorldGeneration:
 
         self.tile_blocks = []
 
+    def check_overlap(self, gx, gy, width, height):
+        for block in self.tile_blocks:
+            # No overlap if one rectangle is completely outside the other
+            if (gx + width <= block.gx or gx >= block.gx + block.width or
+                gy + height <= block.gy or gy >= block.gy + block.height):
+                continue
+            else:
+                return True  # Overlap detected
+        return False
+
     def add_tile_block(self, gx, gy, width, height, type_override=None, cost=0):
+        if self.check_overlap(gx, gy, width, height):
+            print("Cannot place block: Overlaps existing block")
+            return False
         block = TileBlock(gx, gy, width, height, self._tile_size, type_override, cost)
         self.tile_blocks.append(block)
+        return True
 
     def remove_tile_at(self, gx, gy):
         for block in self.tile_blocks:

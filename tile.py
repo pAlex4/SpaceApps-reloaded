@@ -99,7 +99,7 @@ class TileBlock(pygame.sprite.Sprite):
         print(
             f"gx = {self.gx}, gy = {self.gy}, width = {self.width}, height = {self.height}, "
             f"type = {self.type}, masa = {self.masa:.2f}, volumen = {self.volumen:.2f}, "
-            f"costo = {self.costo:.2f}, limpieza = {self.limpieza:.2f}, permanencia = {self.permanencia} days, "
+            f"costo = {self.costo:.2f}, limpieza = {self.limpieza:.2f}, permanencia = {self.permanencia}, "
             f"color = {self.color}"
         )
 
