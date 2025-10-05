@@ -28,12 +28,12 @@ class Player:
             self.camera.y += self.speed
 
     def draw(self, surface):
-        # Player always drawn centered or at fixed point on screen
-        # Here just draw a square at center (optional)
-        center_x = surface.get_width() // 2
-        center_y = surface.get_height() // 2
-        rect = pygame.Rect(center_x - self.tile_size//2, center_y - self.tile_size//2, self.tile_size, self.tile_size)
-        pygame.draw.rect(surface, self.color, rect)
+        # Comment out or remove the blue square drawing below:
+        # center_x = surface.get_width() // 2
+        # center_y = surface.get_height() // 2
+        # rect = pygame.Rect(center_x - self.tile_size//2, center_y - self.tile_size//2, self.tile_size, self.tile_size)
+        # pygame.draw.rect(surface, self.color, rect)
+        pass  # No drawing for player
 
     def execute_action(self, world, grid_pos, mouse_button):
         gx, gy = grid_pos
