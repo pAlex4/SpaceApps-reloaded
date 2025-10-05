@@ -12,7 +12,7 @@ def main():
     pygame.init()
     SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Tile Placement with Property Export")
+    pygame.display.set_caption("Tile Placement with Import/Export")
     clock = pygame.time.Clock()
 
     topbar = TopBar(SCREEN_WIDTH)
@@ -49,7 +49,8 @@ def main():
             topbar.draw_remove_toggle.rect,
             topbar.type_dropdown.rect,
             topbar.toggle_button.rect,
-            topbar.export_button.rect
+            topbar.export_button.rect,
+            topbar.import_button.rect
         ]
 
         if topbar.type_dropdown.is_open:
@@ -86,6 +87,7 @@ def main():
     while running:
         mouse_grid_pos = None
         export_clicked = False
+        import_clicked = False
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -97,9 +99,11 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
 
-                # Detect export button click
                 if topbar.export_button.rect.collidepoint(mouse_pos):
                     export_clicked = True
+                    continue
+                elif topbar.import_button.rect.collidepoint(mouse_pos):
+                    import_clicked = True
                     continue
 
                 if is_menu_open() or click_on_ui(mouse_pos):
@@ -164,6 +168,35 @@ def main():
                 json.dump(data, f, indent=2)
 
             print("Exported tiles saved to exported_tiles.json")
+
+        if import_clicked:
+            try:
+                with open("imported_tiles.json", "r") as f:
+                    data = json.load(f)
+                world.tile_blocks.clear()
+                for cell in data.get("cells", []):
+                    gx = cell.get("x", 0)
+                    gy = cell.get("y", 0)
+                    tile_type = cell.get("type", "PRIVATE").lower()
+                    props = cell.get("props", {})
+
+                    # Assuming 1x1 size tiles on import or modify as needed
+                    width, height = 1, 1
+
+                    # Add tile block, ignore cost argument for imported tiles or set as needed
+                    world.add_tile_block(gx, gy, width, height, tile_type, cost=0)
+
+                    block = world.get_block_at(gx, gy)
+                    if block:
+                        block.masa = props.get("masa", 0.0)
+                        block.volumen = props.get("volumen", 0.0)
+                        block.costo = props.get("costo", 0.0)
+                        block.limpieza = props.get("limpieza", 1.0)
+                        block.permanencia = props.get("permanencia", 1)
+
+                print("Imported tiles loaded from imported_tiles.json")
+            except Exception as e:
+                print("Error importing tiles:", e)
 
         selected_shape = topbar.toggle_button.get_current_option()
         current_shape = size_map.get(selected_shape, (1, 1))

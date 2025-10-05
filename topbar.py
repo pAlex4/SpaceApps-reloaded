@@ -134,13 +134,26 @@ class TopBar:
             self.font,
             options=["Export"]
         )
-        self.export_button.is_open = False  # behaves as a simple button
+        self.export_button.is_open = False  # simple button behavior
+
+        import_width = 80
+        import_height = 30
+        import_x = export_x - import_width - 10
+        import_y = button_y
+
+        self.import_button = ToggleButton(
+            (import_x, import_y),
+            (import_width, import_height),
+            self.font,
+            options=["Import"]
+        )
+        self.import_button.is_open = False  # simple button behavior
 
     def handle_event(self, event):
         self.draw_remove_toggle.handle_event(event)
         self.toggle_button.handle_event(event)
         self.type_dropdown.handle_event(event)
-        # Export button does not toggle open; detect clicks in main loop
+        # Export and Import handled explicitly in main loop on click
 
     def draw(self, surface, money=0):
         pygame.draw.rect(surface, self.bg_color, (0, 0, surface.get_width(), self.height))
@@ -148,6 +161,7 @@ class TopBar:
         self.type_dropdown.draw(surface)
         self.toggle_button.draw(surface)
         self.export_button.draw(surface)
+        self.import_button.draw(surface)
 
         money_text = self.font.render(f"Money: ${money}", True, (255, 255, 255))
         text_rect = money_text.get_rect()
