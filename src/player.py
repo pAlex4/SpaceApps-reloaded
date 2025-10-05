@@ -41,49 +41,51 @@ class Camera:
         world_x, world_y = pos
         return world_x - self.x, world_y - self.y
 
-
-# --- Clase Player ---
 class Player:
-    def __init__(self, x, y, color=GREEN):
+    def __init__(self, x, y, tile_size, color=(50, 200, 100)):
         self.grid_pos = [x, y]
         self.color = color
-        self.camera = Camera()  # ✅ Cámara integrada en el jugador
+        self.camera = Camera()
+        self._tile_size = tile_size
+        self._actions = {
+            113: "add_tile",     # tecla Q
+            101: "remove_tile"   # tecla E
+        }
+        self.action = "add_tile"  # acción inicial
 
-    def update_player_position(self, keys):
-        """Actualiza el movimiento de cámara (WASD)"""
+        self.image = pygame.Surface((self._tile_size, self._tile_size))
+        self.image.fill(self.color)
+        self.rect = self.image.get_rect()
+
+    # --- 1️⃣ Función: cambiar la acción según la tecla presionada ---
+    def change_action(self, key_pressed):
+        """Cambia la acción actual del jugador dependiendo de la tecla presionada."""
+        if key_pressed in self._actions:
+            self.action = self._actions[key_pressed]
+            print(f"Acción actual cambiada a: {self.action}")
+
+    # --- 2️⃣ Función: ejecutar la acción cuando se presiona el mouse ---
+    def execute_action(self, world, mouse_pos, mouse_button):
+        """Ejecuta la acción actual del jugador sobre el mundo al hacer clic."""
+        wx, wy = mouse_pos[0] + self.camera.x, mouse_pos[1] + self.camera.y
+        gx, gy = int(wx // world.tile_size), int(wy // world.tile_size)
+
+        # Solo usar click izquierdo (1)
+        if mouse_button == 1:
+            if self.action == "add_tile":
+                world.add_tile(gx, gy)
+            elif self.action == "remove_tile":
+                world.remove_tile(gx, gy)
+
+    # --- Movimiento y renderizado ---
+    def update_position(self, keys):
         self.camera.move(keys)
 
     def get_world_position(self):
-        """Convierte posición del grid a coordenadas del mundo"""
-        return self.grid_pos[0] * TILE_SIZE, self.grid_pos[1] * TILE_SIZE
+        return self.grid_pos[0] * self._tile_size, self.grid_pos[1] * self._tile_size
 
     def draw(self, surface):
         x, y = self.get_world_position()
         x, y = self.camera.transform_coordinate((x, y))
-        rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
+        rect = pygame.Rect(x, y, self._tile_size, self._tile_size)
         pygame.draw.rect(surface, self.color, rect)
-
-
-# --- Función para dibujar el grid visible ---
-def draw_grid(surface, camera):
-    start_x = int(camera.x // TILE_SIZE) - 1
-    end_x = int((camera.x + SCREEN_WIDTH) // TILE_SIZE) + 2
-    start_y = int(camera.y // TILE_SIZE) - 1
-    end_y = int((camera.y + SCREEN_HEIGHT) // TILE_SIZE) + 2
-
-    for gx in range(start_x, end_x):
-        for gy in range(start_y, end_y):
-            wx = gx * TILE_SIZE
-            wy = gy * TILE_SIZE
-            sx, sy = camera.transform_coordinate((wx, wy))
-            rect = pygame.Rect(sx, sy, TILE_SIZE, TILE_SIZE)
-            pygame.draw.rect(surface, GRAY, rect, 1)
-
-
-# --- Función para colocar tiles en el grid ---
-def draw_tiles(surface, camera, tiles):
-    for (gx, gy), color in tiles.items():
-        wx, wy = gx * TILE_SIZE, gy * TILE_SIZE
-        sx, sy = camera.transform_coordinate((wx, wy))
-        rect = pygame.Rect(sx, sy, TILE_SIZE, TILE_SIZE)
-        pygame.draw.rect(surface, color, rect)
