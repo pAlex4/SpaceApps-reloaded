@@ -16,7 +16,7 @@ class WorldGeneration:
         self.tiles = {}
 
     # --- Métodos públicos para modificar el mundo ---
-    def add_tile(self, gx, gy, color=BROWN):
+    def add_tile(self, gx, gy, color=(255,255,255)):
         if (gx, gy) not in self.tiles:
             self.tiles[(gx, gy)] = Tile(gx, gy, self._tile_size, color)
 
