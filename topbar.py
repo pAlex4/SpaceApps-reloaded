@@ -17,7 +17,6 @@ class TopBar:
         button_options = ["draw", "remove"]
         self.toggle_button = ToggleButton(180, 5, 100, 30, button_options, self.font)
 
-        # Rotate button positioned after toggle button
         self.rotate_button = RotateButton(290, 5, 30, self.font)
 
     def handle_event(self, event):
