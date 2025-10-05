@@ -8,7 +8,7 @@ BLUE = (50, 100, 200)
 TILE_TYPES = [
     "private", "hygiene", "waste", "exercise", "food",
     "maintenance", "science", "medical", "social",
-    "logistics", "airlock"
+    "logistics", "mission planning", "airlock"
 ]
 
 class ToggleButton:
