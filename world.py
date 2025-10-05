@@ -1,18 +1,21 @@
 import pygame
 from tile import *
 
-WHITE = (255, 255, 255)
 GRAY = (180, 180, 180)
-DARK_GRAY = (40, 40, 40)
-GREEN = (50, 200, 100)
 BROWN = (180, 120, 60)
 
-
 class WorldGeneration:
-    def __init__(self, screen_width=800, screen_height=600, tile_size=64):
+    def __init__(self, screen_width=800, screen_height=600, topbar_height=40, grid_size=25):
         self._screen_width = screen_width
         self._screen_height = screen_height
-        self._tile_size = tile_size
+        self.grid_size = grid_size
+        self.topbar_height = topbar_height
+
+        available_height = self._screen_height - self.topbar_height
+        tile_size_vert = available_height / self.grid_size
+        tile_size_horz = self._screen_width / self.grid_size
+        self._tile_size = int(min(tile_size_vert, tile_size_horz))
+
         self.tiles = {}
 
     def add_tile(self, gx, gy, color=BROWN):
@@ -23,23 +26,21 @@ class WorldGeneration:
         if (gx, gy) in self.tiles:
             del self.tiles[(gx, gy)]
 
-    def draw_grid(self, surface, camera):
-        start_x = int(camera.x // self._tile_size) - 1
-        end_x = int((camera.x + self._screen_width) // self._tile_size) + 2
-        start_y = int(camera.y // self._tile_size) - 1
-        end_y = int((camera.y + self._screen_height) // self._tile_size) + 2
+    def draw_grid(self, surface, camera, topbar_height):
+        tile_size = self._tile_size
 
-        for gx in range(start_x, end_x):
-            for gy in range(start_y, end_y):
-                wx = gx * self._tile_size
-                wy = gy * self._tile_size
+        for gx in range(self.grid_size):
+            for gy in range(self.grid_size):
+                wx = gx * tile_size
+                wy = gy * tile_size + topbar_height
                 sx, sy = camera.transform_coordinate((wx, wy))
-                rect = pygame.Rect(sx, sy, self._tile_size, self._tile_size)
+                rect = pygame.Rect(sx, sy, tile_size, tile_size)
                 pygame.draw.rect(surface, GRAY, rect, 1)
 
-    def draw_tiles(self, surface, camera):
+    def draw_tiles(self, surface, camera, topbar_height):
         for tile in self.tiles.values():
             tile.update_position(camera, self._tile_size)
+            tile.rect.y += topbar_height
             surface.blit(tile.image, tile.rect)
 
     @property

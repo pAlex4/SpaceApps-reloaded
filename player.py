@@ -1,65 +1,56 @@
 import pygame
 
-class Camera:
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.speed = 10
-
-    def move(self, keys):
-        if keys[pygame.K_w]:
-            self.y -= self.speed
-        if keys[pygame.K_s]:
-            self.y += self.speed
-        if keys[pygame.K_a]:
-            self.x -= self.speed
-        if keys[pygame.K_d]:
-            self.x += self.speed
-
-    def transform_coordinate(self, pos):
-        world_x, world_y = pos
-        return world_x - self.x, world_y - self.y
-
+BLUE = (50, 100, 200)
 
 class Player:
-    def __init__(self, x, y, tile_size, color=(50, 200, 100)):
-        self.grid_pos = [x, y]
-        self.color = color
+    def __init__(self, x, y, tile_size=32):
+        self.x = x
+        self.y = y
+        self.tile_size = tile_size
+        self.rect = pygame.Rect(x, y, tile_size, tile_size)
+        self.color = BLUE
+        self.speed = 8
+
+        # Assuming a simple camera with x,y offsets for panning
         self.camera = Camera()
-        self._tile_size = tile_size
-        self._actions = {
-            113: "add_tile",     # key Q
-            101: "remove_tile"   # key E
-        }
+
+        # Current action: "add_tile" or "remove_tile"
         self.action = "add_tile"
 
-        self.image = pygame.Surface((self._tile_size, self._tile_size))
-        self.image.fill(self.color)
-        self.rect = self.image.get_rect()
+    def update_position(self, keys):
+        if keys[pygame.K_LEFT]:
+            self.camera.x -= self.speed
+        if keys[pygame.K_RIGHT]:
+            self.camera.x += self.speed
+        if keys[pygame.K_UP]:
+            self.camera.y -= self.speed
+        if keys[pygame.K_DOWN]:
+            self.camera.y += self.speed
 
-    def change_action(self, key_pressed):
-        if key_pressed in self._actions:
-            self.action = self._actions[key_pressed]
-            print(f"Current action changed to: {self.action}")
+    def draw(self, surface):
+        # Player always drawn centered or at fixed point on screen
+        # Here just draw a square at center (optional)
+        center_x = surface.get_width() // 2
+        center_y = surface.get_height() // 2
+        rect = pygame.Rect(center_x - self.tile_size//2, center_y - self.tile_size//2, self.tile_size, self.tile_size)
+        pygame.draw.rect(surface, self.color, rect)
 
-    def execute_action(self, world, mouse_pos, mouse_button):
-        wx, wy = mouse_pos[0] + self.camera.x, mouse_pos[1] + self.camera.y
-        gx, gy = int(wx // world.tile_size), int(wy // world.tile_size)
-
-        if mouse_button == 1:
+    def execute_action(self, world, grid_pos, mouse_button):
+        gx, gy = grid_pos
+        if mouse_button == 1:  # Left click
             if self.action == "add_tile":
                 world.add_tile(gx, gy)
             elif self.action == "remove_tile":
                 world.remove_tile(gx, gy)
 
-    def update_position(self, keys):
-        self.camera.move(keys)
 
-    def get_world_position(self):
-        return self.grid_pos[0] * self._tile_size, self.grid_pos[1] * self._tile_size
+class Camera:
+    def __init__(self):
+        # Camera position in pixels, initial at 0,0
+        self.x = 0
+        self.y = 0
 
-    def draw(self, surface):
-        x, y = self.get_world_position()
-        x, y = self.camera.transform_coordinate((x, y))
-        rect = pygame.Rect(x, y, self._tile_size, self._tile_size)
-        pygame.draw.rect(surface, self.color, rect)
+    def transform_coordinate(self, pos):
+        # Adjust world coordinate to screen coordinate by subtracting camera offset
+        wx, wy = pos
+        return wx - self.x, wy - self.y
